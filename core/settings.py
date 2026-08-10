@@ -25,7 +25,9 @@ SECRET_KEY = 'django-insecure-2b*i&jem@r7^ornepohjry#ay3pnc4+20+_3@a+sw-27gstmm)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+# Development setup: the server is meant to be reachable from other devices
+# in the local network. Restrict this to real host names before deploying.
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -142,13 +144,10 @@ REST_FRAMEWORK = {
 
 # Cross-Origin Resource Sharing
 # The frontend is served from a separate origin and needs explicit access.
+# Every origin is allowed because the frontend may be opened from any host
+# in the local network. Replace this with CORS_ALLOWED_ORIGINS in production.
 
-CORS_ALLOWED_ORIGINS = [
-    'http://127.0.0.1:5500',
-    'http://localhost:5500',
-    'http://127.0.0.1:5501',
-    'http://localhost:5501',
-]
+CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True
 

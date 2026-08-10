@@ -52,6 +52,16 @@ class RegistrationTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('email', response.data)
 
+    def test_registration_rejects_email_differing_only_in_case(self):
+        self.client.post(self.url, VALID_PAYLOAD, format='json')
+        payload = {**VALID_PAYLOAD, 'email': 'MAX.MUSTERMANN@EXAMPLE.COM'}
+
+        response = self.client.post(self.url, payload, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('email', response.data)
+        self.assertEqual(User.objects.count(), 1)
+
     def test_registration_rejects_missing_fields(self):
         response = self.client.post(self.url, {'email': 'a@b.de'}, format='json')
 

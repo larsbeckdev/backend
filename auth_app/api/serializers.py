@@ -25,7 +25,11 @@ class RegistrationSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True, 'min_length': 8}}
 
     def validate_email(self, value):
-        """Reject e-mail addresses that are already registered."""
+        """Reject addresses that differ from an existing one only in case.
+
+        The unique constraint on the model is case sensitive, so this check
+        is what stops ``MAX@example.com`` next to ``max@example.com``.
+        """
         if User.objects.filter(email__iexact=value).exists():
             raise serializers.ValidationError(
                 'This email address is already registered.')

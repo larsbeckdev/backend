@@ -89,12 +89,6 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ['id', 'created_at', 'author', 'content']
 
-    def validate_content(self, value):
-        """Reject comments that only consist of whitespace."""
-        if not value.strip():
-            raise serializers.ValidationError('This field may not be blank.')
-        return value
-
 
 class BoardSummarySerializer(serializers.ModelSerializer):
     """Board representation used by the list and create endpoints."""
