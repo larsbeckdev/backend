@@ -40,7 +40,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
+    'auth_app',
+    'kanban_app',
 ]
+
+AUTH_USER_MODEL = 'auth_app.User'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
