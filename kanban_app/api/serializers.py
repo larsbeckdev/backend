@@ -5,7 +5,40 @@ from rest_framework import serializers
 from auth_app.api.serializers import UserShortSerializer
 from auth_app.models import User
 
-from ..models import Board
+from ..models import Board, Task
+
+
+class TaskSerializer(serializers.ModelSerializer):
+    """Full task representation returned by the task endpoints."""
+
+    assignee = UserShortSerializer(read_only=True)
+    reviewer = UserShortSerializer(read_only=True)
+    comments_count = serializers.SerializerMethodField()
+    assignee_id = serializers.PrimaryKeyRelatedField(
+        source='assignee', queryset=User.objects.all(),
+        write_only=True, required=False, allow_null=True)
+    reviewer_id = serializers.PrimaryKeyRelatedField(
+        source='reviewer', queryset=User.objects.all(),
+        write_only=True, required=False, allow_null=True)
+
+    class Meta:
+        model = Task
+        fields = ['id', 'board', 'title', 'description', 'status', 'priority',
+                  'assignee', 'reviewer', 'due_date', 'comments_count',
+                  'assignee_id', 'reviewer_id']
+
+    def get_comments_count(self, obj):
+        """Return the annotated comment count or fall back to a query."""
+        count = getattr(obj, 'comments_count', None)
+        return obj.comments.count() if count is None else count
+
+
+class BoardTaskSerializer(TaskSerializer):
+    """Task representation embedded in the board detail payload."""
+
+    class Meta(TaskSerializer.Meta):
+        fields = ['id', 'title', 'description', 'status', 'priority',
+                  'assignee', 'reviewer', 'due_date', 'comments_count']
 
 
 class BoardSummarySerializer(serializers.ModelSerializer):
@@ -40,6 +73,18 @@ class BoardCreateSerializer(serializers.ModelSerializer):
             owner=self.context['request'].user, **validated_data)
         board.members.set(members)
         return board
+
+
+class BoardDetailSerializer(serializers.ModelSerializer):
+    """Board representation including its members and all of its tasks."""
+
+    owner_id = serializers.IntegerField(read_only=True)
+    members = UserShortSerializer(many=True, read_only=True)
+    tasks = BoardTaskSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Board
+        fields = ['id', 'title', 'owner_id', 'members', 'tasks']
 
 
 class BoardUpdateSerializer(serializers.ModelSerializer):
