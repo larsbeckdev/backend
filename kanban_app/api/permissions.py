@@ -38,3 +38,13 @@ class IsTaskBoardParticipant(BasePermission):
             return (obj.created_by_id == request.user.id
                     or obj.board.owner_id == request.user.id)
         return is_board_participant(obj.board, request.user)
+
+
+class IsCommentAuthor(BasePermission):
+    """Allow only the author of a comment to delete it."""
+
+    message = 'Only the author of this comment can delete it.'
+
+    def has_object_permission(self, request, view, obj):
+        """Compare the comment author with the requesting user."""
+        return obj.author_id == request.user.id

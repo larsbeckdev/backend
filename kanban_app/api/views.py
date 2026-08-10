@@ -6,13 +6,15 @@ from rest_framework import generics, mixins, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from ..models import Board, Task
-from .permissions import IsBoardOwnerOrParticipant, IsTaskBoardParticipant
+from ..models import Board, Comment, Task
+from .permissions import (IsBoardOwnerOrParticipant, IsCommentAuthor,
+                          IsTaskBoardParticipant)
 from .serializers import (BoardCreateSerializer, BoardDetailSerializer,
                           BoardSummarySerializer, BoardUpdateSerializer,
-                          TaskCreateSerializer, TaskSerializer,
-                          TaskUpdateSerializer)
-from .utils import boards_for_user, resolve_board, task_queryset
+                          CommentSerializer, TaskCreateSerializer,
+                          TaskSerializer, TaskUpdateSerializer)
+from .utils import (boards_for_user, resolve_board, resolve_task,
+                    task_queryset)
 
 
 class BoardListCreateView(generics.ListCreateAPIView):
@@ -119,3 +121,36 @@ class ReviewingTaskListView(generics.ListAPIView):
     def get_queryset(self):
         """Return the tasks where the user is the reviewer."""
         return task_queryset().filter(reviewer=self.request.user)
+
+
+class CommentListCreateView(generics.ListCreateAPIView):
+    """List the comments of a task and add new ones."""
+
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+
+    @cached_property
+    def task(self):
+        """Resolve the task from the URL and verify board membership."""
+        return resolve_task(self.kwargs['task_id'], self.request.user)
+
+    def get_queryset(self):
+        """Return the comments of the task in chronological order."""
+        return self.task.comments.select_related('author')
+
+    def perform_create(self, serializer):
+        """Attach the new comment to the task and to its author."""
+        serializer.save(task=self.task, author=self.request.user)
+
+
+class CommentDeleteView(generics.DestroyAPIView):
+    """Delete a single comment of a task."""
+
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, IsCommentAuthor]
+
+    def get_queryset(self):
+        """Limit deletions to comments belonging to the task in the URL."""
+        resolve_task(self.kwargs['task_id'], self.request.user)
+        return Comment.objects.filter(task_id=self.kwargs['task_id'])

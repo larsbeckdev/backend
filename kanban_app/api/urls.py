@@ -3,7 +3,8 @@
 from django.urls import path
 
 from .views import (AssignedTaskListView, BoardDetailView,
-                    BoardListCreateView, ReviewingTaskListView,
+                    BoardListCreateView, CommentDeleteView,
+                    CommentListCreateView, ReviewingTaskListView,
                     TaskCreateView, TaskDetailView)
 
 urlpatterns = [
@@ -15,4 +16,8 @@ urlpatterns = [
     path('tasks/reviewing/', ReviewingTaskListView.as_view(),
          name='task-reviewing'),
     path('tasks/<int:pk>/', TaskDetailView.as_view(), name='task-detail'),
+    path('tasks/<int:task_id>/comments/', CommentListCreateView.as_view(),
+         name='comment-list'),
+    path('tasks/<int:task_id>/comments/<int:pk>/', CommentDeleteView.as_view(),
+         name='comment-detail'),
 ]

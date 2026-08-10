@@ -49,6 +49,18 @@ def resolve_board(board_id, user):
     return board
 
 
+def resolve_task(task_id, user):
+    """Return a task the user may access or raise 404 respectively 403."""
+    try:
+        task = Task.objects.select_related('board').get(pk=task_id)
+    except Task.DoesNotExist:
+        raise NotFound('Task not found.')
+    if not is_board_participant(task.board, user):
+        raise PermissionDenied(
+            'You must be a member of the board this task belongs to.')
+    return task
+
+
 def boards_for_user(user):
     """Return the annotated boards a user owns or is a member of.
 

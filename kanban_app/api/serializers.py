@@ -5,7 +5,7 @@ from rest_framework import serializers
 from auth_app.api.serializers import UserShortSerializer
 from auth_app.models import User
 
-from ..models import Board, Task
+from ..models import Board, Comment, Task
 from .permissions import is_board_participant
 
 
@@ -78,6 +78,22 @@ class TaskUpdateSerializer(TaskSerializer):
         validate_board_membership(attrs.get('assignee'), board, 'assignee_id')
         validate_board_membership(attrs.get('reviewer'), board, 'reviewer_id')
         return attrs
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    """Comment representation with the author rendered as a display name."""
+
+    author = serializers.CharField(source='author.fullname', read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'created_at', 'author', 'content']
+
+    def validate_content(self, value):
+        """Reject comments that only consist of whitespace."""
+        if not value.strip():
+            raise serializers.ValidationError('This field may not be blank.')
+        return value
 
 
 class BoardSummarySerializer(serializers.ModelSerializer):
