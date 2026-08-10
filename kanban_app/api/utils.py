@@ -1,8 +1,11 @@
 """Query helpers shared by the kanban API views."""
 
 from django.db.models import Count, Q
+from rest_framework.exceptions import (NotFound, PermissionDenied,
+                                       ValidationError)
 
 from ..models import Board, Task
+from .permissions import is_board_participant
 
 
 def annotate_board_counts(queryset):
@@ -26,6 +29,24 @@ def task_queryset():
     """Return tasks with their related users and comment count preloaded."""
     return Task.objects.select_related('assignee', 'reviewer', 'board').annotate(
         comments_count=Count('comments'))
+
+
+def resolve_board(board_id, user):
+    """Return the board a new task belongs to or raise the matching error.
+
+    Missing ids fail with 400, unknown ids with 404 and boards the user
+    does not participate in with 403.
+    """
+    if board_id in (None, ''):
+        raise ValidationError({'board': 'This field is required.'})
+    try:
+        board = Board.objects.get(pk=board_id)
+    except (Board.DoesNotExist, ValueError, TypeError):
+        raise NotFound('Board not found.')
+    if not is_board_participant(board, user):
+        raise PermissionDenied(
+            'You must be a member of this board to create a task.')
+    return board
 
 
 def boards_for_user(user):

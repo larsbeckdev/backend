@@ -6,6 +6,15 @@ from auth_app.api.serializers import UserShortSerializer
 from auth_app.models import User
 
 from ..models import Board, Task
+from .permissions import is_board_participant
+
+
+def validate_board_membership(user, board, field_name):
+    """Raise a validation error when a user does not belong to a board."""
+    if user is None or is_board_participant(board, user):
+        return
+    raise serializers.ValidationError(
+        {field_name: 'This user is not a member of the board.'})
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -39,6 +48,36 @@ class BoardTaskSerializer(TaskSerializer):
     class Meta(TaskSerializer.Meta):
         fields = ['id', 'title', 'description', 'status', 'priority',
                   'assignee', 'reviewer', 'due_date', 'comments_count']
+
+
+class TaskCreateSerializer(TaskSerializer):
+    """Validate a new task against the board resolved by the view."""
+
+    class Meta(TaskSerializer.Meta):
+        read_only_fields = ['board']
+
+    def validate(self, attrs):
+        """Ensure assignee and reviewer belong to the target board."""
+        board = self.context['board']
+        validate_board_membership(attrs.get('assignee'), board, 'assignee_id')
+        validate_board_membership(attrs.get('reviewer'), board, 'reviewer_id')
+        return attrs
+
+
+class TaskUpdateSerializer(TaskSerializer):
+    """Update an existing task without allowing it to change boards."""
+
+    class Meta(TaskSerializer.Meta):
+        fields = ['id', 'title', 'description', 'status', 'priority',
+                  'assignee', 'reviewer', 'due_date',
+                  'assignee_id', 'reviewer_id']
+
+    def validate(self, attrs):
+        """Ensure assignee and reviewer still belong to the task's board."""
+        board = self.instance.board
+        validate_board_membership(attrs.get('assignee'), board, 'assignee_id')
+        validate_board_membership(attrs.get('reviewer'), board, 'reviewer_id')
+        return attrs
 
 
 class BoardSummarySerializer(serializers.ModelSerializer):
