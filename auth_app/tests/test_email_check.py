@@ -28,7 +28,8 @@ class EmailCheckTests(APITestCase):
                           'fullname': 'Max Mustermann'})
 
     def test_lookup_is_case_insensitive(self):
-        response = self.client.get(self.url, {'email': 'MAX.MUSTERMANN@EXAMPLE.COM'})
+        response = self.client.get(
+            self.url, {'email': 'MAX.MUSTERMANN@EXAMPLE.COM'})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

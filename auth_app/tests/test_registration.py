@@ -27,7 +27,8 @@ class RegistrationTests(APITestCase):
         self.assertEqual(set(response.data),
                          {'token', 'fullname', 'email', 'user_id'})
         self.assertEqual(response.data['email'], VALID_PAYLOAD['email'])
-        self.assertTrue(User.objects.filter(email=VALID_PAYLOAD['email']).exists())
+        self.assertTrue(
+            User.objects.filter(email=VALID_PAYLOAD['email']).exists())
 
     def test_registration_hashes_the_password(self):
         self.client.post(self.url, VALID_PAYLOAD, format='json')
@@ -63,13 +64,15 @@ class RegistrationTests(APITestCase):
         self.assertEqual(User.objects.count(), 1)
 
     def test_registration_rejects_missing_fields(self):
-        response = self.client.post(self.url, {'email': 'a@b.de'}, format='json')
+        response = self.client.post(self.url, {'email': 'a@b.de'},
+                                    format='json')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('fullname', response.data)
 
     def test_registration_rejects_short_password(self):
-        payload = {**VALID_PAYLOAD, 'password': 'short', 'repeated_password': 'short'}
+        payload = {**VALID_PAYLOAD, 'password': 'short',
+                   'repeated_password': 'short'}
 
         response = self.client.post(self.url, payload, format='json')
 

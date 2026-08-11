@@ -44,7 +44,8 @@ class LoginTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_login_rejects_unknown_email(self):
-        payload = {'email': 'nobody@example.com', 'password': 'examplePassword'}
+        payload = {'email': 'nobody@example.com',
+                   'password': 'examplePassword'}
 
         response = self.client.post(self.url, payload, format='json')
 

@@ -5,11 +5,12 @@ from rest_framework.permissions import BasePermission
 
 def is_board_participant(board, user):
     """Return whether a user owns the board or is one of its members."""
-    return board.owner_id == user.id or board.members.filter(pk=user.id).exists()
+    return (board.owner_id == user.id
+            or board.members.filter(pk=user.id).exists())
 
 
 class IsBoardOwnerOrParticipant(BasePermission):
-    """Let participants read and update a board, but only the owner delete it."""
+    """Let participants read and update a board, only the owner delete it."""
 
     message = 'You must be the owner or a member of this board.'
 

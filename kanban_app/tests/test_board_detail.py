@@ -135,7 +135,8 @@ class BoardUpdateTests(APITestCase):
     def test_stranger_is_forbidden(self):
         self.client.force_authenticate(user=self.stranger)
 
-        response = self.client.patch(self.url, {'title': 'Nope'}, format='json')
+        response = self.client.patch(self.url, {'title': 'Nope'},
+                                     format='json')
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 

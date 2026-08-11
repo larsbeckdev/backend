@@ -27,8 +27,9 @@ def annotate_board_counts(queryset):
 
 def task_queryset():
     """Return tasks with their related users and comment count preloaded."""
-    return Task.objects.select_related('assignee', 'reviewer', 'board').annotate(
-        comments_count=Count('comments'))
+    return Task.objects.select_related(
+        'assignee', 'reviewer', 'board').annotate(
+            comments_count=Count('comments'))
 
 
 def resolve_board(board_id, user):

@@ -143,7 +143,8 @@ class BoardUpdateSerializer(serializers.ModelSerializer):
     members_data = UserShortSerializer(source='members', many=True,
                                        read_only=True)
     members = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=User.objects.all(), required=False, write_only=True)
+        many=True, queryset=User.objects.all(), required=False,
+        write_only=True)
 
     class Meta:
         model = Board
