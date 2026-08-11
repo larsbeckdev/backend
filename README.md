@@ -65,14 +65,15 @@ board with one task per status and a comment on every task:
 python manage.py seed_demo
 ```
 
-It is safe to run more than once and prints the guest credentials it created.
-The frontend has a "Guest Login" button that expects exactly this account:
+It is safe to run more than once and prints the guest credentials it created,
+so run it once and read the login details off your terminal. All demo
+accounts share the same password.
 
-| Account | Email | Password |
-| --- | --- | --- |
-| Guest / board owner | `kevin@kovacsi.de` | `asdasdasd` |
-| Board member | `max.mustermann@example.com` | `asdasdasd` |
-| Board member | `maxi.musterfrau@example.com` | `asdasdasd` |
+One of the accounts is the one the "Guest Login" button of the frontend
+expects; the frontend hard-codes it in `shared/js/config.js`. The account
+definitions live in
+`kanban_app/management/commands/seed_demo.py` if you need to look them up
+later.
 
 ## Optional: admin interface
 
