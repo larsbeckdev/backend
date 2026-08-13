@@ -1,9 +1,6 @@
 # KanMind Backend
 
-REST API for the KanMind kanban board, built with Django and Django REST
-Framework. It powers the KanMind frontend: user registration and login with
-token authentication, boards shared between members, tasks with assignees and
-reviewers, and comments on tasks.
+REST API for the KanMind kanban board, built with Django and Django REST Framework. It powers the KanMind frontend: user registration and login with token authentication, boards shared between members, tasks with assignees and reviewers, and comments on tasks.
 
 The frontend lives in its own repository and is **not** part of this project.
 
@@ -12,8 +9,7 @@ The frontend lives in its own repository and is **not** part of this project.
 - Python 3.12 or newer (developed and tested on 3.14)
 - pip
 
-No database server is needed. The project uses SQLite, which ships with
-Python.
+No database server is needed. The project uses SQLite, which ships with Python.
 
 ## Setup
 
@@ -40,6 +36,18 @@ Install the dependencies:
 
 ```bash
 pip install -r requirements.txt
+```
+
+Create a `.env` file next to `manage.py` with a secret key:
+
+```bash
+DJANGO_SECRET_KEY=replace-this-with-a-long-random-string
+```
+
+A key can be generated with:
+
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
 
 Create the database:
@@ -185,7 +193,6 @@ This repository is configured for local development. Before deploying it
 anywhere, change the following in `core/settings.py`:
 
 - `DEBUG` must be `False`.
-- `SECRET_KEY` must be read from the environment, not from the source file.
 - `ALLOWED_HOSTS` must list the real host names instead of `'*'`.
 - `CORS_ALLOW_ALL_ORIGINS` must be replaced by an explicit
   `CORS_ALLOWED_ORIGINS` list.
